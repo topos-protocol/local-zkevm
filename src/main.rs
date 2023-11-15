@@ -36,18 +36,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let params = rpc_params! {s, b};
 
     let rpc_response: Result<Option<serde_json::Value>, _> =
-        client.request("eth_getBlockByNumber", params).await;
-
-    let rpc2_response: Result<Option<serde_json::Value>, _> =
         client.request("trace_block", rpc_params! {"0x0"}).await;
 
     match rpc_response {
-        Ok(Some(s)) => println!("ok some {s}"),
-        Ok(None) => println!("ok none"),
-        Err(e) => println!("%%%Error: {e:?}"),
-    };
-
-    match rpc2_response {
         Ok(Some(s)) => println!("ok some {s}"),
         Ok(None) => println!("ok none"),
         Err(e) => println!("%%%Error: {e:?}"),

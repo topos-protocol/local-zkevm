@@ -10,16 +10,14 @@ import {
 
 import mcdoJSON from '../artifacts/contracts/Mcdo.sol/Mcdo.json'
 
-async function initState() {
-    // Initial state
-    let dev1_pk = "26e86e45f6fc45ec6e2ecd128cec80fa1d1505e5507dcd2ae58c3130a7a97b48";
-    let dev2_pk = "45a915e4d060149eb4365960e6a7a45f334393093061116b197e3240065ff2d8";
-    let dev3_pk = "59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
 
-    let endpoint = "http://127.0.0.1:8545";
+async function deployMcdo() {
+    const dev_pk = "26e86e45f6fc45ec6e2ecd128cec80fa1d1505e5507dcd2ae58c3130a7a97b48"
+
+    const endpoint = "http://127.0.0.1:8545"; // erigon
     const provider = new providers.JsonRpcProvider(endpoint)
 
-    const myWallet = new Wallet(dev3_pk, provider)
+    const myWallet = new Wallet(dev_pk, provider)
 
     const mcdoContractFactory = new ContractFactory(
         mcdoJSON.abi,
@@ -27,23 +25,81 @@ async function initState() {
         myWallet
     );
 
-    const mcdo = await mcdoContractFactory.connect(myWallet).deploy(3);
+    const mcdo = await mcdoContractFactory.connect(myWallet).deploy();
 
     // Wait for the contract to be deployed and get the deployed address
-    await mcdo.deployed();
-    console.log('Contract deployed to:', mcdo.address);
-    //return mcdo
+    return mcdo.deployed()
+}
+
+function getTrace(b: string) {
+    const endpoint = "http://127.0.0.1:8546"; // jerigon
+    const provider = new providers.JsonRpcProvider(endpoint);
+
+    return provider.send("debug_traceBlockByNumber", [b, { "tracer": "zeroTracer" }])
+}
+
+// Block start is excluded from the transition
+async function prove(block_start: any, block_end: any) {
+    console.log(`State transition: (${block_start.number};${block_end.number}]`);
+
+    const trace = await getTrace(block_end.number);
+    const trace_json = JSON.stringify(trace);
+
+    console.log(`Trace for block ${block_end.number}: ${JSON.stringify(trace_json)}`);
+
+    const rawResponse = await fetch('http://localhost:8080/prove', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: trace_json
+    });
+
+    // TODO: Replace the dummy proof by the real one
+    //
+    // Failed to deserialize the JSON body into the target type:
+    // [0]: missing field `trie_pre_images` at line 1 column 6676
+
+    const proof = await rawResponse.json();
+    console.log(proof);
+    // return proof;
+
+    return "0xgreatproof"
+}
+
+async function getState() {
+    const endpoint = "http://localhost:22323";
+    const provider = new providers.JsonRpcProvider(endpoint);
+
+    return provider.send("eth_getBlockByNumber", ["0x10", { "tracer": "zeroTracer" }])
 }
 
 async function main() {
-    //const mcdo = await initState();
-    await initState();
+    const mcdo = await deployMcdo();
+    console.log('Contract deployed at:', mcdo.address);
 
-    console.log('', mcdo.address);
-    // My burgers are respecting the norms, not too much sugar
-    // and no usage of chemicals without revealing my secret ingredients
-    const sugar = 6; // Grams of sugar in the big mac (the biggy sauce)
-    const mustard = 3; // I don't want to reveal my mustard
+    const revealed_sugar_quantity = 6;
+    const hidden_mustard_quantity = 3;
+
+    // zkit.start(); // (UX brainstorming)
+    const state_before = await getState();
+
+    // First transaction
+    const sugar_tx = await mcdo.setIngredient(
+        "sugar",
+        "usa",
+        revealed_sugar_quantity,
+        { gasLimit: 4_000_000 });
+    console.log(sugar_tx);
+
+    // Second transaction
+    const mustard_tx = await mcdo.setIngredient(
+        "mustard",
+        "dijon",
+        hidden_mustard_quantity,
+        { gasLimit: 4_000_000 });
+    console.log(mustard_tx);
 
     // zkit.pause(); // (UX brainstorming)
     const state_after = await getState();
@@ -51,11 +107,10 @@ async function main() {
     //
     // Create the state transition proof
     //
+    const proof = await prove(state_before, state_after);
+    console.log("proof: ", proof);
 
-    // (proof, resulting_state_root) = computeProof(state_n1, [tx1, tx2])
     // assert!(verify(proof, resulting_state_root, ))
-
-    //hre.tracer.enabled = false;
 }
 
 main().catch((error) => {
