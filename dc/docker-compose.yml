@@ -5,6 +5,11 @@ services:
     container_name: node-erigon
     init: true
     user: erigon
+    healthcheck:
+      # Check that the node is connected to the other one
+      test: |
+        curl http://node-erigon:$ERIGON_RPC_PORT -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq '.result == "0x1"'
+      interval: 2s
     command:
       - "--datadir=/home/erigon/.local/share/erigon"
       - "--chain=dev"
@@ -27,6 +32,11 @@ services:
     container_name: node-jerigon
     init: true
     user: erigon
+    healthcheck:
+      # Check that the node is connected to the other one
+      test: |
+        curl http://node-jerigon:$JERIGON_RPC_PORT -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq '.result == "0x1"'
+      interval: 2s
     command:
       - "--datadir=/home/erigon/.local/share/erigon"
       - "--chain=dev"
