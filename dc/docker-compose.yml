@@ -1,0 +1,55 @@
+version: "3.3"
+services:
+  node-erigon:
+    image: erigon:latest
+    container_name: node-erigon
+    init: true
+    user: erigon
+    command:
+      - "--datadir=/home/erigon/.local/share/erigon"
+      - "--chain=dev"
+      - "--private.api.addr=0.0.0.0:9090"
+      - "--mine"
+      - "--http.api=eth,erigon,web3,net,debug,trace,txpool,parity,admin"
+      - "--http.corsdomain='*'"
+      - "--http.addr=0.0.0.0"
+      - "--http.port=$ERIGON_RPC_PORT"
+    ports:
+      - $ERIGON_RPC_PORT:$ERIGON_RPC_PORT
+    volumes:
+      - erigon-data:/home/erigon/.local/share/erigon
+      - ./nodekey:/home/erigon/.local/share/erigon/nodekey
+    environment:
+      - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
+
+  node-jerigon:
+    image: jerigon:latest
+    container_name: node-jerigon
+    init: true
+    user: erigon
+    command:
+      - "--datadir=/home/erigon/.local/share/erigon"
+      - "--chain=dev"
+      - "--private.api.addr=0.0.0.0:9091"
+      - "--staticpeers=enode://$ERIGON_ENODE@node-erigon:30303"
+      - "--nodiscover"
+      - "--authrpc.port=39232"
+      - "--port=0"
+      - "--torrent.port=42072"
+      - "--log.dir.verbosity=trace"
+      - "--http.api=eth,erigon,web3,net,debug,trace,txpool,parity,admin"
+      - "--http.addr=0.0.0.0"
+      - "--http.port=$JERIGON_RPC_PORT"
+    ports:
+      - $JERIGON_RPC_PORT:$JERIGON_RPC_PORT
+    environment:
+      - JERIGON_RPC_PORT=${JERIGON_RPC_PORT}
+    volumes:
+      - jerigon-data:/home/erigon/.local/share/erigon
+    depends_on:
+      node-erigon:
+        condition: service_started
+
+volumes:
+  erigon-data:
+  jerigon-data:
