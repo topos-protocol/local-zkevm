@@ -22,7 +22,7 @@ contract Mcdo {
         uint8 quantity
     ) public {
         require(msg.sender == owner, "You aren't the owner");
-        if (keccak256(bytes(name)) == keccak256("sugar")) {
+        if (keccak256(bytes(name)) == keccak256("ketchup")) {
             require(quantity < uint8(100), "waaay too much sugar");
         }
 

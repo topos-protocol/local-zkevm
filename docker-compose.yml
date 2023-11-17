@@ -23,7 +23,7 @@ services:
       - $ERIGON_RPC_PORT:$ERIGON_RPC_PORT
     volumes:
       - erigon-data:/home/erigon/.local/share/erigon
-      - ./nodekey:/home/erigon/.local/share/erigon/nodekey
+      - ./assets/nodekey:/home/erigon/.local/share/erigon/nodekey
     environment:
       - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
 

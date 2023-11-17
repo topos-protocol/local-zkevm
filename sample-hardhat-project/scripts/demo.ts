@@ -79,7 +79,7 @@ async function main() {
     const mcdo = await deployMcdo();
     console.log('Contract deployed at:', mcdo.address);
 
-    const revealed_sugar_quantity = 6;
+    const revealed_ketchup_quantity = 6;
     const hidden_mustard_quantity = 3;
 
     // zkit.start(); // (UX brainstorming)
@@ -89,9 +89,9 @@ async function main() {
     const sugar_tx = await mcdo.setIngredient(
         "sugar",
         "usa",
-        revealed_sugar_quantity,
+        revealed_ketchup_quantity,
         { gasLimit: 4_000_000 });
-    console.log(`Sugar transaction: ${sugar_tx.hash}`);
+    console.log(`Ketchup transaction: ${sugar_tx.hash}`);
 
     // Second transaction
     const mustard_tx = await mcdo.setIngredient(
