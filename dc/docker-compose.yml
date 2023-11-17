@@ -60,6 +60,21 @@ services:
       node-erigon:
         condition: service_started
 
+  zero-bin:
+    image: zerobin:latest
+    container_name: zero-bin
+    command:
+      - "--mode=http"
+      - "--runtime=in-memory"
+      - "--output-dir=/tmp/proofs"
+    ports:
+      - 8080:8080
+    environment:
+      - RUST_LOG=debug
+    volumes:
+      - proof-data:/tmp/proofs
+
 volumes:
   erigon-data:
   jerigon-data:
+  proof-data:
