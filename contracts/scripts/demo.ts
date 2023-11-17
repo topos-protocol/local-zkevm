@@ -69,10 +69,10 @@ async function prove(block_start: any, block_end: any) {
 }
 
 async function getState() {
-    const endpoint = "http://localhost:22323";
+    const endpoint = "http://localhost:8546";
     const provider = new providers.JsonRpcProvider(endpoint);
 
-    return provider.send("eth_getBlockByNumber", ["0x10", { "tracer": "zeroTracer" }])
+    return provider.send("eth_getBlockByNumber", ["latest", false]);
 }
 
 async function main() {
