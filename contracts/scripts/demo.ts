@@ -40,7 +40,7 @@ function getTrace(b: string) {
 
 // Block start is excluded from the transition
 async function prove(block_start: any, block_end: any) {
-    console.log(`State transition: (${block_start.number};${block_end.number}]`);
+    console.log(`State transition from block ${block_start.number} excluded to ${block_end.number} included`);
 
     const trace = await getTrace(block_end.number);
     const trace_json = JSON.stringify(trace);
@@ -61,8 +61,8 @@ async function prove(block_start: any, block_end: any) {
     // Failed to deserialize the JSON body into the target type:
     // [0]: missing field `trie_pre_images` at line 1 column 6676
 
-    const proof = await rawResponse.json();
-    console.log(proof);
+    // const proof = await rawResponse.json();
+    // console.log(proof);
     // return proof;
 
     return "0xgreatproof"
@@ -91,7 +91,7 @@ async function main() {
         "usa",
         revealed_sugar_quantity,
         { gasLimit: 4_000_000 });
-    console.log(sugar_tx);
+    console.log(`Sugar transaction: ${sugar_tx.hash}`);
 
     // Second transaction
     const mustard_tx = await mcdo.setIngredient(
@@ -99,7 +99,7 @@ async function main() {
         "dijon",
         hidden_mustard_quantity,
         { gasLimit: 4_000_000 });
-    console.log(mustard_tx);
+    console.log(`Mustard transaction: ${mustard_tx.hash}`);
 
     // zkit.pause(); // (UX brainstorming)
     const state_after = await getState();
@@ -108,9 +108,11 @@ async function main() {
     // Create the state transition proof
     //
     const proof = await prove(state_before, state_after);
-    console.log("proof: ", proof);
+    console.log(`Final proof: ${proof}`);
 
-    // assert!(verify(proof, resulting_state_root, ))
+    // (proof, transition_digest) = zkit.get_proof(); // (UX brainstorming)
+    // merkle_proof = transition_digest.contains(sugar_tx); // (UX brainstorming)
+    // assert!(verify(proof, resulting_state_root,)) // (UX brainstorming)
 }
 
 main().catch((error) => {
