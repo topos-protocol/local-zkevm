@@ -15,6 +15,7 @@ Local zkEVM to give zk capabilities in your solidity contract development
 First, let's run the backend composed of the local chain.
 
 ```sh
+docker compose pull
 docker compose up -d
 ```
 
