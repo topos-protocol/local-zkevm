@@ -1,15 +1,9 @@
 version: "3.3"
 services:
   node-erigon:
-    image: erigon:latest
+    image: thorax/erigon:${ERIGON_VERSION}
     container_name: node-erigon
     init: true
-    user: erigon
-    healthcheck:
-      # Check that the node is connected to the other one
-      test: |
-        curl http://node-erigon:$ERIGON_RPC_PORT -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq '.result == "0x1"'
-      interval: 2s
     command:
       - "--datadir=/home/erigon/.local/share/erigon"
       - "--chain=dev"
@@ -28,15 +22,18 @@ services:
       - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
 
   node-jerigon:
-    image: jerigon:latest
+    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
     container_name: node-jerigon
     init: true
     user: erigon
-    healthcheck:
-      # Check that the node is connected to the other one
-      test: |
-        curl http://node-jerigon:$JERIGON_RPC_PORT -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq '.result == "0x1"'
-      interval: 2s
+    # TODO: need to add jq and curl in their image
+    # healthcheck:
+    #   # Check that the node is connected to the other one
+    #   test: >
+    #     curl http://node-jerigon:$JERIGON_RPC_PORT -X POST -H "Content-Type: application/json" -s -d '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq -e '.result == "0x1"'
+    #   interval: 2s
+    #   timeout: 2s
+    #   retries: 20
     command:
       - "--datadir=/home/erigon/.local/share/erigon"
       - "--chain=dev"
@@ -61,11 +58,11 @@ services:
         condition: service_started
 
   zero-bin:
-    image: zerobin:latest
+    image: ghcr.io/topos-protocol/zero-bin:${ZERO_BIN_VERSION}
     container_name: zero-bin
     command:
-      - "--mode=http"
       - "--runtime=in-memory"
+      - "http"
       - "--output-dir=/tmp/proofs"
     ports:
       - 8080:8080
