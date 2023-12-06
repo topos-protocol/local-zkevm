@@ -1,77 +1,106 @@
-version: "3.3"
+version: '3.3'
 services:
   node-erigon:
     image: thorax/erigon:${ERIGON_VERSION}
     container_name: node-erigon
     init: true
     command:
-      - "--datadir=/home/erigon/.local/share/erigon"
-      - "--chain=dev"
-      - "--private.api.addr=0.0.0.0:9090"
-      - "--mine"
-      - "--http.api=eth,erigon,web3,net,debug,trace,txpool,parity,admin"
+      - '--datadir=/home/erigon/.local/share/erigon'
+      - '--chain=dev'
+      - '--private.api.addr=0.0.0.0:9090'
+      - '--mine'
+      - '--http.api=eth,erigon,web3,net,debug,trace,txpool,parity,admin'
       - "--http.corsdomain='*'"
-      - "--http.addr=0.0.0.0"
-      - "--http.port=$ERIGON_RPC_PORT"
+      - '--http.addr=0.0.0.0'
+      - '--http.port=$ERIGON_RPC_PORT'
     ports:
       - $ERIGON_RPC_PORT:$ERIGON_RPC_PORT
     volumes:
-      - erigon-data:/home/erigon/.local/share/erigon
+      - erigon-data:/home/erigon/.local/share/
       - ./assets/nodekey:/home/erigon/.local/share/erigon/nodekey
     environment:
       - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
+
+  dup-chaindata:
+    container_name: dup-chaindata
+    command: sh -c "cd /home/erigon/.local/share/ && \
+      cp -rv ./erigon ./erigon.bak && \
+      ls -lRa ./erigon && ls -lRa ./erigon.bak"
+    image: debian:bullseye-slim
+    depends_on:
+      node-erigon:
+        condition: service_started
+    volumes:
+      - erigon-data:/home/erigon/.local/share/
+
+  stateless-init:
+    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
+    entrypoint: ['state']
+    container_name: stateless-init
+    init: true
+    user: root
+    command:
+      - 'stateless'
+      - '--block=1'
+      - '--datadir'
+      - '/home/erigon/.local/share/erigon.bak'
+      - '--witnessDbFile'
+      - '/home/erigon/.local/share/erigon.bak/chaindata'
+      - '--statefile'
+      - '/home/erigon/.local/share/jerrigon-state'
+      - '--chain'
+      - 'dev'
+      - '--verbosity'
+      - 'trace'
+    depends_on:
+      dup-chaindata:
+        condition: service_completed_successfully
+    volumes:
+      - erigon-data:/home/erigon/.local/share/erigon.bak
+      - './assets/genesis.json:/home/erigon/.local/share/genesis.json'
 
   node-jerigon:
     image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
     container_name: node-jerigon
     init: true
-    user: erigon
-    # TODO: need to add jq and curl in their image
-    # healthcheck:
-    #   # Check that the node is connected to the other one
-    #   test: >
-    #     curl http://node-jerigon:$JERIGON_RPC_PORT -X POST -H "Content-Type: application/json" -s -d '{"jsonrpc":"2.0","method":"net_peerCount","params":[],"id":68}' | jq -e '.result == "0x1"'
-    #   interval: 2s
-    #   timeout: 2s
-    #   retries: 20
+    user: root
     command:
-      - "--datadir=/home/erigon/.local/share/erigon"
-      - "--chain=dev"
-      - "--private.api.addr=0.0.0.0:9091"
-      - "--staticpeers=enode://$ERIGON_ENODE@node-erigon:30303"
-      - "--nodiscover"
-      - "--authrpc.port=39232"
-      - "--port=0"
-      - "--torrent.port=42072"
-      - "--log.dir.verbosity=trace"
-      - "--http.api=eth,erigon,web3,net,debug,trace,txpool,parity,admin"
-      - "--http.addr=0.0.0.0"
-      - "--http.port=$JERIGON_RPC_PORT"
+      - '--datadir=/home/erigon/.local/share/erigon.bak'
+      - '--chain=dev'
+      - '--private.api.addr=0.0.0.0:9091'
+      - '--staticpeers=enode://$ERIGON_ENODE@node-erigon:30303'
+      - '--nodiscover'
+      - '--authrpc.port=39232'
+      - '--port=0'
+      - '--torrent.port=42072'
+      - '--log.dir.verbosity=trace'
+      - '--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,parity,admin'
+      - '--http.addr=0.0.0.0'
+      - '--http.port=$JERIGON_RPC_PORT'
     ports:
       - $JERIGON_RPC_PORT:$JERIGON_RPC_PORT
     environment:
       - JERIGON_RPC_PORT=${JERIGON_RPC_PORT}
     volumes:
-      - jerigon-data:/home/erigon/.local/share/erigon
+      - erigon-data:/home/erigon/.local/share/erigon.bak
     depends_on:
-      node-erigon:
+      stateless-init:
         condition: service_started
 
-  zero-bin:
-    image: ghcr.io/topos-protocol/zero-bin:${ZERO_BIN_VERSION}
-    container_name: zero-bin
-    command:
-      - "--runtime=in-memory"
-      - "http"
-      - "--output-dir=/tmp/proofs"
-    ports:
-      - 8080:8080
-    environment:
-      - RUST_LOG=debug
-    volumes:
-      - proof-data:/tmp/proofs
+  # zero-bin:
+  #   image: ghcr.io/topos-protocol/zero-bin:${ZERO_BIN_VERSION}
+  #   container_name: zero-bin
+  #   command:
+  #     - '--runtime=in-memory'
+  #     - 'http'
+  #     - '--output-dir=/tmp/proofs'
+  #   ports:
+  #     - 8080:8080
+  #   environment:
+  #     - RUST_LOG=debug
+  #   volumes:
+  #     - proof-data:/tmp/proofs
 
 volumes:
   erigon-data:
-  jerigon-data:
   proof-data:
