@@ -13,79 +13,40 @@ services:
       - "--http.corsdomain='*'"
       - '--http.addr=0.0.0.0'
       - '--http.port=$ERIGON_RPC_PORT'
+      - '--p2p.allowed-ports=30303'
+      - '--p2p.protocol=67'
     ports:
       - $ERIGON_RPC_PORT:$ERIGON_RPC_PORT
+      - '30303'
     volumes:
       - erigon-data:/home/erigon/.local/share/
       - ./assets/nodekey:/home/erigon/.local/share/erigon/nodekey
     environment:
       - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
 
-  dup-chaindata:
-    container_name: dup-chaindata
-    command: sh -c "cd /home/erigon/.local/share/ && \
-      cp -rv ./erigon ./erigon.bak && \
-      ls -lRa ./erigon && ls -lRa ./erigon.bak"
-    image: debian:bullseye-slim
-    depends_on:
-      node-erigon:
-        condition: service_started
-    volumes:
-      - erigon-data:/home/erigon/.local/share/
-
-  stateless-init:
-    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
-    entrypoint: ['state']
-    container_name: stateless-init
-    init: true
-    user: root
-    command:
-      - 'stateless'
-      - '--block=1'
-      - '--datadir'
-      - '/home/erigon/.local/share/erigon.bak'
-      - '--witnessDbFile'
-      - '/home/erigon/.local/share/erigon.bak/chaindata'
-      - '--statefile'
-      - '/home/erigon/.local/share/jerrigon-state'
-      - '--chain'
-      - 'dev'
-      - '--verbosity'
-      - 'trace'
-    depends_on:
-      dup-chaindata:
-        condition: service_completed_successfully
-    volumes:
-      - erigon-data:/home/erigon/.local/share/erigon.bak
-      - './assets/genesis.json:/home/erigon/.local/share/genesis.json'
-
   node-jerigon:
-    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
+    #image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
+    image: 75d8eb365927
+    entrypoint: ['/bin/sh']
     container_name: node-jerigon
     init: true
     user: root
     command:
-      - '--datadir=/home/erigon/.local/share/erigon.bak'
-      - '--chain=dev'
-      - '--private.api.addr=0.0.0.0:9091'
-      - '--staticpeers=enode://$ERIGON_ENODE@node-erigon:30303'
-      - '--nodiscover'
-      - '--authrpc.port=39232'
-      - '--port=0'
-      - '--torrent.port=42072'
-      - '--log.dir.verbosity=trace'
-      - '--http.api=eth,erigon,engine,web3,net,debug,trace,txpool,parity,admin'
-      - '--http.addr=0.0.0.0'
-      - '--http.port=$JERIGON_RPC_PORT'
+      - '/home/erigon/.local/share/run-stateless.sh'
+    depends_on:
+      node-erigon:
+        condition: service_started
     ports:
       - $JERIGON_RPC_PORT:$JERIGON_RPC_PORT
+      - '30304'
+      - '30303'
+    volumes:
+      - erigon-data:/home/erigon/.local/share/
+      - './scripts/run-stateless.sh:/home/erigon/.local/share/run-stateless.sh'
     environment:
       - JERIGON_RPC_PORT=${JERIGON_RPC_PORT}
-    volumes:
-      - erigon-data:/home/erigon/.local/share/erigon.bak
-    depends_on:
-      stateless-init:
-        condition: service_started
+      - ERIGON_ENODE=${ERIGON_ENODE}
+      - GENERATION_INTERVAL=${GENERATION_INTERVAL}
 
   # zero-bin:
   #   image: ghcr.io/topos-protocol/zero-bin:${ZERO_BIN_VERSION}

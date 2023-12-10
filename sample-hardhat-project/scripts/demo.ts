@@ -3,7 +3,7 @@ import { Block, JsonRpcProvider } from 'ethers'
 import { ethers } from 'hardhat'
 
 const jerigonProvider = new JsonRpcProvider('http://127.0.0.1:8546')
-const zeroBinAPI = axios.create({ baseURL: 'http://127.0.0.1:8080' })
+const zeroBinAPI = axios.create({ baseURL: 'http://127.0.0.1:8080'})
 
 async function deployMcdo() {
   const mcdo = await ethers.deployContract('Mcdo', { gasLimit: 4_000_000 })
@@ -61,21 +61,26 @@ async function getState() {
 async function main() {
   const mcdo = await deployMcdo()
   console.log('Contract deployed at:', await mcdo.getAddress())
+  console.log('Deployment transaction:', await mcdo.deploymentTransaction()?.getTransaction());
 
   const revealed_ketchup_quantity = 6
   const hidden_mustard_quantity = 3
 
   // zkit.start(); // (UX brainstorming)
-  const state_before = await getState()
+  //const state_before = await getState()
 
   // First transaction
-  const sugar_tx = await mcdo.setIngredient(
+  const ketchup_tx = await mcdo.setIngredient(
     'sugar',
     'usa',
     revealed_ketchup_quantity,
     { gasLimit: 4_000_000 }
   )
-  console.log(`Ketchup transaction: ${sugar_tx.hash}`)
+  console.log(`\n\nKetchup transaction: ${ketchup_tx.hash}`)
+  const tx1 = await jerigonProvider.getTransaction(ketchup_tx.hash);
+  console.log(
+    `ketchup trace: ${JSON.stringify(tx1)}`
+  );
 
   // Second transaction
   const mustard_tx = await mcdo.setIngredient(
@@ -84,16 +89,20 @@ async function main() {
     hidden_mustard_quantity,
     { gasLimit: 4_000_000 }
   )
-  console.log(`Mustard transaction: ${mustard_tx.hash}`)
+  console.log(`\n\nMustard transaction: ${mustard_tx.hash}`)
+  const tx2 = await jerigonProvider.getTransaction(mustard_tx.hash);
+  console.log(
+    `mustard trace: ${JSON.stringify(tx2)}`
+  );
 
   // zkit.pause(); // (UX brainstorming)
-  const state_after = await getState()
+  //const state_after = await getState()
 
   //
   // Create the state transition proof
   //
-  const proof = await prove(state_before, state_after)
-  console.log(`Final proof: ${proof}`)
+  //const proof = await prove(state_before, state_after)
+  //console.log(`Final proof: ${proof}`)
 
   // (proof, transition_digest) = zkit.get_proof(); // (UX brainstorming)
   // merkle_proof = transition_digest.contains(sugar_tx); // (UX brainstorming)
