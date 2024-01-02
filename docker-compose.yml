@@ -1,7 +1,8 @@
 version: '3.3'
 services:
   node-erigon:
-    image: thorax/erigon:${ERIGON_VERSION}
+    #image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
+    image: ${JERIGON_TAG}
     container_name: node-erigon
     init: true
     command:
@@ -26,7 +27,7 @@ services:
 
   node-jerigon:
     #image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
-    image: 75d8eb365927
+    image: ${JERIGON_TAG}
     entrypoint: ['/bin/sh']
     container_name: node-jerigon
     init: true
@@ -42,7 +43,7 @@ services:
       - '30303'
     volumes:
       - erigon-data:/home/erigon/.local/share/
-      - './scripts/run-stateless.sh:/home/erigon/.local/share/run-stateless.sh'
+      - './assets/run-stateless.sh:/home/erigon/.local/share/run-stateless.sh'
     environment:
       - JERIGON_RPC_PORT=${JERIGON_RPC_PORT}
       - ERIGON_ENODE=${ERIGON_ENODE}
