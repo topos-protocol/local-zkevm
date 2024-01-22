@@ -1,8 +1,7 @@
 version: '3.3'
 services:
   node-erigon:
-    #image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
-    image: ${JERIGON_TAG}
+    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
     container_name: node-erigon
     init: true
     command:
@@ -26,8 +25,7 @@ services:
       - ERIGON_RPC_PORT=${ERIGON_RPC_PORT}
 
   node-jerigon:
-    #image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
-    image: ${JERIGON_TAG}
+    image: ghcr.io/topos-protocol/erigon:${JERIGON_VERSION}
     entrypoint: ['/bin/sh']
     container_name: node-jerigon
     init: true
