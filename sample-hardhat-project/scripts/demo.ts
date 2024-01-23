@@ -100,15 +100,13 @@ async function main() {
   const tx2 = await jerigonProvider.getTransaction(mustard_tx.hash)
   console.log(`mustard trace: ${JSON.stringify(tx2)}`)
 
-  const { proofBlob, receiptsRoot } = await generateReceiptMptProof(tx1!, jerigonProvider)
+  const proof = await generateReceiptMptProof(tx1!, jerigonProvider)
   console.log(`\n\nKetchup transaction`)
-  console.log(`Merkle proof: ${JSON.stringify(proofBlob, null, 2)}`)
-  console.log(`Receipts root: ${JSON.stringify(receiptsRoot, null, 2)}`)
+  console.log(JSON.stringify({merkle_proof: proof}))
 
-  const { proofBlob: proofBlob2, receiptsRoot: receiptsRoot2 } = await generateReceiptMptProof(tx2!, jerigonProvider)
+  const proof2 = await generateReceiptMptProof(tx2!, jerigonProvider)
   console.log(`\n\nMustard transaction`)
-  console.log(`Merkle proof: ${JSON.stringify(proofBlob2, null, 2)}`)
-  console.log(`Receipts root: ${JSON.stringify(receiptsRoot2, null, 2)}`)
+  console.log(JSON.stringify({ merkle_proof: proof2 }))
 
   // zkit.pause(); // (UX brainstorming)
   //const state_after = await getState()

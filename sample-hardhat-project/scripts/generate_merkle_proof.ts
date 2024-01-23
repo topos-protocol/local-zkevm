@@ -5,6 +5,8 @@ import { Trie } from '@ethereumjs/trie'
 /// Generate a Merkle Patricia Tree proof for a transaction
 /// @param tx Transaction to generate the proof for
 /// @param provider Provider to use to fetch the block
+/// @throws If the block's receipts root does not match the trie root
+/// @returns The transaction's Merkle Patricia Trie proof
 export async function generateReceiptMptProof(
   tx: TransactionResponse,
   provider: JsonRpcProvider
@@ -31,15 +33,14 @@ export async function generateReceiptMptProof(
     (_tx) => _tx.hash === tx.hash
   )
   const key = Buffer.from(RLP.encode(indexOfTx))
-
-  const { stack: _stack } = await trie.findPath(key)
-  const stack = _stack.map((node) => node.raw())
-  const proofBlob = hexlify(RLP.encode([1, indexOfTx, stack]))
-  return { proofBlob, receiptsRoot }
+  const proof = await trie.createProof(key)
+  const proofStringBytes = proof.map((p) => hexlify(p))
+  return proofStringBytes.join('')
 }
 
 /// Create a Merkle Patricia Tree for a block's receipts
 /// @param block Block to create the trie for
+/// @returns The receipt's Merkle Patricia Trie
 async function createReceiptMpt(block: Block) {
   const trie = new Trie()
   await Promise.all(
