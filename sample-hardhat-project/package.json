@@ -1,6 +1,8 @@
 {
   "name": "hardhat-project",
   "scripts": {
+    "get-receipt": "hardhat get-receipt",
+    "get-receipt-trie-root": "hardhat get-receipt-trie-root",
     "demo": "hardhat run scripts/demo.ts",
     "build": "hardhat compile",
     "clean": "hardhat clean"

@@ -1,6 +1,9 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 
+import './tasks/get-receipt'
+import './tasks/get-receipt-trie-root'
+
 const config: HardhatUserConfig = {
   defaultNetwork: 'erigon',
   networks: {
