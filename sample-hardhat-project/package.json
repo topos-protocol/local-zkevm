@@ -11,6 +11,8 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@ethereumjs/rlp": "^4.0.1",
+    "@ethereumjs/trie": "^5.0.4",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "axios": "^1.6.2",
     "hardhat": "2.17.3"

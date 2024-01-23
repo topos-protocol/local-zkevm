@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Block, JsonRpcProvider } from 'ethers'
 import { ethers } from 'hardhat'
+import { generateReceiptMptProof } from './generate_merkle_proof'
 
 const jerigonProvider = new JsonRpcProvider('http://127.0.0.1:8546')
 const zeroBinAPI = axios.create({ baseURL: 'http://127.0.0.1:8080' })
@@ -82,6 +83,7 @@ async function main() {
     revealed_ketchup_quantity,
     { gasLimit: 4_000_000 }
   )
+  await ketchup_tx.wait()
   console.log(`\n\nKetchup transaction: ${ketchup_tx.hash}`)
   const tx1 = await jerigonProvider.getTransaction(ketchup_tx.hash)
   console.log(`ketchup trace: ${JSON.stringify(tx1)}`)
@@ -93,9 +95,20 @@ async function main() {
     hidden_mustard_quantity,
     { gasLimit: 4_000_000 }
   )
+  await mustard_tx.wait()
   console.log(`\n\nMustard transaction: ${mustard_tx.hash}`)
   const tx2 = await jerigonProvider.getTransaction(mustard_tx.hash)
   console.log(`mustard trace: ${JSON.stringify(tx2)}`)
+
+  const { proofBlob, receiptsRoot } = await generateReceiptMptProof(tx1!, jerigonProvider)
+  console.log(`\n\nKetchup transaction`)
+  console.log(`Merkle proof: ${JSON.stringify(proofBlob, null, 2)}`)
+  console.log(`Receipts root: ${JSON.stringify(receiptsRoot, null, 2)}`)
+
+  const { proofBlob: proofBlob2, receiptsRoot: receiptsRoot2 } = await generateReceiptMptProof(tx2!, jerigonProvider)
+  console.log(`\n\nMustard transaction`)
+  console.log(`Merkle proof: ${JSON.stringify(proofBlob2, null, 2)}`)
+  console.log(`Receipts root: ${JSON.stringify(receiptsRoot2, null, 2)}`)
 
   // zkit.pause(); // (UX brainstorming)
   //const state_after = await getState()
