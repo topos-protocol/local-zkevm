@@ -1,7 +1,10 @@
 import axios from 'axios'
 import { Block, JsonRpcProvider } from 'ethers'
 import { ethers } from 'hardhat'
-import { generateReceiptMptProof } from './generate_merkle_proof'
+import {
+  generateReceiptMptProof,
+  verifyReceiptMptProof,
+} from './merkle_proofs'
 
 const jerigonProvider = new JsonRpcProvider('http://127.0.0.1:8546')
 const zeroBinAPI = axios.create({ baseURL: 'http://127.0.0.1:8080' })
@@ -102,11 +105,25 @@ async function main() {
 
   const proof = await generateReceiptMptProof(tx1!, jerigonProvider)
   console.log(`\n\nKetchup transaction`)
-  console.log(JSON.stringify({merkle_proof: proof}))
+  console.log(
+    JSON.stringify({
+      merkle_proof: proof,
+    })
+  )
 
   const proof2 = await generateReceiptMptProof(tx2!, jerigonProvider)
   console.log(`\n\nMustard transaction`)
-  console.log(JSON.stringify({ merkle_proof: proof2 }))
+  console.log(
+    JSON.stringify({
+      merkle_proof: proof2,
+    })
+  )
+
+  const result = await verifyReceiptMptProof(tx1!, jerigonProvider, proof)
+  console.log(`\n\nKetchup transaction merkle proof valid: ${result}`)
+
+  const result2 = await verifyReceiptMptProof(tx2!, jerigonProvider, proof2)
+  console.log(`\n\nMustard transaction merkle proof valid: ${result2}`)
 
   // zkit.pause(); // (UX brainstorming)
   //const state_after = await getState()

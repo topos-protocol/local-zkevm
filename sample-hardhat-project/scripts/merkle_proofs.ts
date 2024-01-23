@@ -34,8 +34,42 @@ export async function generateReceiptMptProof(
   )
   const key = Buffer.from(RLP.encode(indexOfTx))
   const proof = await trie.createProof(key)
-  const proofStringBytes = proof.map((p) => hexlify(p))
-  return proofStringBytes.join('')
+  const proofStringArray = proof.map((p) => hexlify(p))
+  return proofStringArray
+}
+
+/// Verify a Merkle Patricia Tree proof for a transaction
+/// @param tx Transaction to verify the proof for
+/// @param provider Provider to use to fetch the block
+/// @param proof Proof to verify
+/// @returns Whether the proof is valid
+export async function verifyReceiptMptProof(
+  tx: TransactionResponse,
+  provider: JsonRpcProvider,
+  proof: string[]
+) {
+  const prefetchTxs = true
+  const block = await provider.getBlock(tx.blockHash!, prefetchTxs)
+  const indexOfTx = block!.prefetchedTransactions.findIndex(
+    (_tx) => _tx.hash === tx.hash
+  )
+  const rawBlock = await (provider as any).send('eth_getBlockByHash', [
+    tx.blockHash,
+    prefetchTxs,
+  ])
+
+  const receiptsRoot = rawBlock.receiptsRoot
+  const receiptRootBuffer = Buffer.from(receiptsRoot.slice(2), 'hex')
+  const key = Buffer.from(RLP.encode(indexOfTx))
+  let proofBufferArray: Buffer[] = []
+  proof.forEach((p) => proofBufferArray.push(Buffer.from(p.slice(2), 'hex')))
+
+  const trie = new Trie()
+  const value = await trie.verifyProof(receiptRootBuffer, key, proofBufferArray)
+  if (value === null) {
+    return false
+  }
+  return true
 }
 
 /// Create a Merkle Patricia Tree for a block's receipts
