@@ -1,11 +1,12 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "get-receipt": "hardhat get-receipt",
-    "get-receipt-trie-root": "hardhat get-receipt-trie-root",
-    "demo": "hardhat run scripts/demo.ts",
     "build": "hardhat compile",
-    "clean": "hardhat clean"
+    "clean": "hardhat clean",
+    "demo": "hardhat run scripts/demo.ts",
+    "generate-receipt-merkle-proof": "hardhat generate-receipt-merkle-proof",
+    "get-receipt-trie-root": "hardhat get-receipt-trie-root",
+    "verify-receipt-merkle-proof": "hardhat verify-receipt-merkle-proof"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
