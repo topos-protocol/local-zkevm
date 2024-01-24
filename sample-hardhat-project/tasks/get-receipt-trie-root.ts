@@ -2,15 +2,20 @@ import { task } from 'hardhat/config'
 
 task(
   'get-receipt-trie-root',
-  'Get a block receipt trie root from a block number'
+  'Get a block receipt trie root from a transaction hash'
 )
-  .addPositionalParam('blockNumber')
+  .addPositionalParam('txHash')
   .setAction(async (taskArgs, hre) => {
     const { ethers } = hre
-    const { blockNumber } = taskArgs
-    const block = await ethers.provider.send('eth_getBlockByNumber', [
-      blockNumber,
-      false,
+    const { txHash } = taskArgs
+
+    const transaction = await ethers.provider.getTransaction(txHash)
+
+    const prefetchTxs = false
+    const block = await ethers.provider.send('eth_getBlockByHash', [
+      transaction?.blockHash,
+      prefetchTxs,
     ])
+
     console.log(block.receiptsRoot)
   })

@@ -1,8 +1,9 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 
-import './tasks/get-receipt'
+import './tasks/generate-receipt-merkle-proof'
 import './tasks/get-receipt-trie-root'
+import './tasks/verify-receipt-merkle-proof'
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'erigon',
