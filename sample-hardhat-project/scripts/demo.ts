@@ -36,10 +36,10 @@ async function main() {
     hiddenMustardQuantity,
     { gasLimit: 4_000_000 }
   )
-  await mustardTx.wait()
+  const mustardReceipt = await mustardTx.wait()
   console.log(`Mustard transaction: ${mustardTx.hash}`)
 
-  console.log(`\nBlock number: ${mustardTx.blockNumber}`)
+  console.log(`\nBlock number: ${mustardReceipt?.blockNumber}`)
 }
 
 main().catch((error) => {
