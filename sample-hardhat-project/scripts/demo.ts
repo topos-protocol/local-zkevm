@@ -27,7 +27,7 @@ async function main() {
     { gasLimit: 4_000_000 }
   )
   await ketchup_tx.wait()
-  console.log(`\n\nKetchup transaction: ${ketchup_tx.hash}`)
+  console.log(`Ketchup transaction: ${ketchup_tx.hash}`)
 
   // Second transaction
   const mustard_tx = await mcdo.setIngredient(
@@ -37,7 +37,9 @@ async function main() {
     { gasLimit: 4_000_000 }
   )
   await mustard_tx.wait()
-  console.log(`\n\nMustard transaction: ${mustard_tx.hash}`)
+  console.log(`Mustard transaction: ${mustard_tx.hash}`)
+
+  console.log(`\nBlock number: ${mustard_tx.blockNumber}`)
 }
 
 main().catch((error) => {
