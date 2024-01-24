@@ -13,16 +13,22 @@ task('verify-receipt-merkle-proof', 'Verify a receipt merkle proof')
     const transaction = await ethers.provider.getTransaction(txHash)
 
     if (transaction && transaction.blockHash) {
-      const prefetchTxs = true
-      const block = await ethers.provider.getBlock(
-        transaction.blockHash,
-        prefetchTxs
-      )
+      const prefetchTxs = false
+      const block = await ethers.provider.getBlock(transaction.blockHash)
+      const rawBlock = await ethers.provider.send('eth_getBlockByHash', [
+        transaction?.blockHash,
+        prefetchTxs,
+      ])
+
+      if (rawBlock.receiptsRoot !== receiptTrieRoot) {
+        console.log(
+          `❌ The provided receipt trie root doesn't match the one of the transaction's block`
+        )
+        return
+      }
 
       if (block) {
-        const txIndex = block?.prefetchedTransactions.findIndex(
-          (tx) => tx.hash === txHash
-        )
+        const txIndex = block?.transactions.findIndex((hash) => hash === txHash)
         const key = Buffer.from(RLP.encode(txIndex))
 
         const receiptTrieRootAsBuffer = Buffer.from(
