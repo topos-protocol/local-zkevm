@@ -16,30 +16,30 @@ async function main() {
       .then((txResponse) => txResponse?.hash)
   )
 
-  const revealed_ketchup_quantity = 6
-  const hidden_mustard_quantity = 3
+  const revealedKetchupQuantity = 6
+  const hiddenMustardQuantity = 3
 
   // First transaction
-  const ketchup_tx = await mcdo.setIngredient(
+  const ketchupTx = await mcdo.setIngredient(
     'sugar',
     'usa',
-    revealed_ketchup_quantity,
+    revealedKetchupQuantity,
     { gasLimit: 4_000_000 }
   )
-  await ketchup_tx.wait()
-  console.log(`Ketchup transaction: ${ketchup_tx.hash}`)
+  await ketchupTx.wait()
+  console.log(`Ketchup transaction: ${ketchupTx.hash}`)
 
   // Second transaction
-  const mustard_tx = await mcdo.setIngredient(
+  const mustardTx = await mcdo.setIngredient(
     'mustard',
     'dijon',
-    hidden_mustard_quantity,
+    hiddenMustardQuantity,
     { gasLimit: 4_000_000 }
   )
-  await mustard_tx.wait()
-  console.log(`Mustard transaction: ${mustard_tx.hash}`)
+  await mustardTx.wait()
+  console.log(`Mustard transaction: ${mustardTx.hash}`)
 
-  console.log(`\nBlock number: ${mustard_tx.blockNumber}`)
+  console.log(`\nBlock number: ${mustardTx.blockNumber}`)
 }
 
 main().catch((error) => {
