@@ -36,7 +36,9 @@ task('verify-receipt-merkle-proof', 'Verify a receipt merkle proof')
           'hex'
         )
 
-        const proofBufferArray = [Buffer.from(proof.slice(2), 'hex')]
+        const proofBufferArray = (proof as string)
+          .split(',')
+          .map((p) => Buffer.from(p.slice(2), 'hex'))
 
         const trie = new Trie()
 

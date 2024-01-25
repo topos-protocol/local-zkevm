@@ -31,10 +31,10 @@ async function createReceiptMpt(blockWithTransactions: Block) {
       ])
 
       if (transactionType === 0) {
-        trie.put(key, Buffer.from(value))
+        await trie.put(key, Buffer.from(value))
       } else {
         const buf = Buffer.concat([Buffer.from([transactionType]), value])
-        trie.put(key, buf)
+        await trie.put(key, buf)
       }
     })
   )
@@ -70,7 +70,9 @@ task(
           .map((p) => hexlify(p))
           .toString()
 
-        console.log(proof)
+        console.log(
+          `✅ Successfully generated merkle proof for transaction ${txHash}: \n\n${proof}`
+        )
       }
     }
   })
