@@ -19,11 +19,14 @@ async function main() {
   const revealedKetchupQuantity = 6
   const hiddenMustardQuantity = 3
 
+  const signers = await ethers.getSigners()
+  const nonce = await ethers.provider.getTransactionCount(signers[0])
+
   // First transaction
   mcdo
     .setIngredient('sugar', 'usa', revealedKetchupQuantity, {
       gasLimit: 4_000_000,
-      nonce: 1,
+      nonce,
     })
     .then(async (tx) => {
       const receipt = await tx.wait()
@@ -36,7 +39,7 @@ async function main() {
   mcdo
     .setIngredient('mustard', 'dijon', hiddenMustardQuantity, {
       gasLimit: 4_000_000,
-      nonce: 2,
+      nonce: nonce + 1,
     })
     .then(async (tx) => {
       const receipt = await tx.wait()
