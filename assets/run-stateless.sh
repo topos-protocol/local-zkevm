@@ -6,7 +6,7 @@ STATEFILE=$PWD/new-jerrigon-state
 
 function get_latest_block_height() {
     latest_block=$(curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest", false],"id":1}' -s http://localhost:$JERIGON_RPC_PORT | jq -r '.result.number' | xargs printf "%d\n")
-    echo "✅ Latest block height: $latest_block"
+    echo "🕵️ Latest block height: $latest_block"
 }
 
 function start_jerrigon() {
@@ -40,7 +40,7 @@ function generate_witness() {
         echo -n 1 > start.index
     fi
     start_block=$(cat start.index)
-    end_block=$latest_block
+    end_block=$(($latest_block+1)) # to include up to the latest
 
     echo
     echo "🤖 Running the stateless command for $start_block..$end_block"
@@ -64,7 +64,7 @@ function main() {
     while true; do
         sleep $GENERATION_INTERVAL
         get_latest_block_height
-        if [[ $latest_block -ne $end_block ]]; then
+        if [[ $latest_block -gt $end_block ]]; then
             stop_jerrigon
             generate_witness
             start_jerrigon
