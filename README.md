@@ -61,3 +61,12 @@ docker compose down -v
 
 The reason behind having these two nodes is due to one bug on `jerigon` where transactions get stuck in the txpool.
 Consequently for now, we rely on `erigon` to produce the blocks, and `jerigon` to expose the traces.
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT license ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
+
+at your option.
