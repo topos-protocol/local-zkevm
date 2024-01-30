@@ -1,13 +1,13 @@
-<div id="top"></div>
+<div id="top" />
 <br />
 <div align="center">
-<p align="center">
-Local zkEVM to give zk capabilities in your solidity contract development
-</p>
-</div>
-
-<br />
-
+  <img src="./.github/assets/topos_logo.png#gh-light-mode-only" alt="Logo" width="200">
+  <img src="./.github/assets/topos_logo_dark.png#gh-dark-mode-only" alt="Logo" width="200">
+  <br />
+  <p align="center">
+  <b>Local zkEVM to give zk capabilities in your solidity contract development 🚀</b>
+  </p>
+  <br />
 </div>
 
 ## Getting Started
