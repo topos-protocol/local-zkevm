@@ -1,16 +1,18 @@
 import { ethers } from 'hardhat'
 
-async function deployMcdo() {
-  const mcdo = await ethers.deployContract('Mcdo', { gasLimit: 4_000_000 })
-  return mcdo.waitForDeployment()
+async function deployKitchen() {
+  const kitchen = await ethers.deployContract('Kitchen', {
+    gasLimit: 4_000_000,
+  })
+  return kitchen.waitForDeployment()
 }
 
 async function main() {
-  const mcdo = await deployMcdo()
-  console.log('Contract deployed at:', await mcdo.getAddress())
+  const kitchen = await deployKitchen()
+  console.log('Contract deployed at:', await kitchen.getAddress())
   console.log(
     'Deployment transaction:',
-    await mcdo
+    await kitchen
       .deploymentTransaction()
       ?.getTransaction()
       .then((txResponse) => txResponse?.hash)
@@ -23,7 +25,7 @@ async function main() {
   const nonce = await ethers.provider.getTransactionCount(signers[0])
 
   // First transaction
-  mcdo
+  kitchen
     .setIngredient('sugar', 'usa', revealedKetchupQuantity, {
       gasLimit: 4_000_000,
       nonce,
@@ -36,7 +38,7 @@ async function main() {
     })
 
   // Second transaction
-  mcdo
+  kitchen
     .setIngredient('mustard', 'dijon', hiddenMustardQuantity, {
       gasLimit: 4_000_000,
       nonce: nonce + 1,
