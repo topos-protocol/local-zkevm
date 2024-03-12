@@ -2,8 +2,12 @@ import axios from 'axios'
 import { Block, JsonRpcProvider } from 'ethers'
 import { ethers } from 'hardhat'
 
+const quorumProvider = new JsonRpcProvider('http://127.0.0.1:22000')
 const jerigonProvider = new JsonRpcProvider('http://127.0.0.1:8546')
 const zeroBinAPI = axios.create({ baseURL: 'http://127.0.0.1:8080' })
+
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+
 
 async function deployMcdo() {
   const mcdo = await ethers.deployContract('Mcdo', { gasLimit: 4_000_000 })
@@ -52,9 +56,18 @@ async function getState() {
   const blockNumber = 'latest'
   const transactionDetailFlag = false
 
-  return jerigonProvider.send('eth_getBlockByNumber', [
+  return quorumProvider.send('eth_getBlockByNumber', [
     blockNumber,
     transactionDetailFlag,
+  ])
+}
+
+async function getTransactionBlockNumber(transactionHash: string) {
+  const blockNumber = 'latest'
+  const transactionDetailFlag = false
+
+  return quorumProvider.send('eth_getTransactionByHash', [
+    transactionHash,
   ])
 }
 
@@ -89,11 +102,22 @@ async function main() {
   // zkit.pause(); // (UX brainstorming)
   const state_after = await getState()
 
-  //
+  console.log(`Waiting a bit for the transactions to be mined...`)
+  
+  await sleep(6000)
+  
+
+  const blockNumeberSugar = await getTransactionBlockNumber(sugar_tx.hash)
+  const blockNumeberMustard = await getTransactionBlockNumber(mustard_tx.hash)
+  
+  console.log(`Mustard transaction block number: ${JSON.stringify(blockNumeberSugar)} and Ketchup transaction block number: ${JSON.stringify(blockNumeberMustard)}`)
+
+
+  
   // Create the state transition proof
   //
-  const proof = await prove(state_before, state_after)
-  console.log(`Final proof: ${proof}`)
+  // const proof = await prove(state_before, state_after)
+  // console.log(`Final proof: ${proof}`)
 
   // (proof, transition_digest) = zkit.get_proof(); // (UX brainstorming)
   // merkle_proof = transition_digest.contains(sugar_tx); // (UX brainstorming)
